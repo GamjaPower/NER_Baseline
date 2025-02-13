@@ -16,7 +16,6 @@ from transformers import (
 )
 
 import yaml
-import wandb
 from dotenv import load_dotenv
 from easydict import EasyDict
 from model import RobertaWithLinearHead
@@ -53,12 +52,8 @@ def main() :
     # Wandb
     model_name = CFG.PLM.replace("/", "_")
 
-    load_dotenv(dotenv_path="wandb.env")
-    WANDB_AUTH_KEY = os.getenv('WANDB_AUTH_KEY')
-    wandb.login(key=WANDB_AUTH_KEY)
 
     run_name = f"{model_name}-finetuned-ner"
-    wandb.init(entity=CFG.entity_name, project=CFG.project_name, name=run_name)
 
     # Train & Eval configs
     training_args = TrainingArguments(
@@ -81,8 +76,6 @@ def main() :
         metric_for_best_model=CFG.metric_for_best_model,
     )
 
-    wandb.config.update(training_args)
-
     # Metrics
     metrics = Metric()
 
@@ -101,7 +94,6 @@ def main() :
     trainer.train()
     # Evaluating
     trainer.evaluate()
-    wandb.finish()
 
 def seed_everything(seed):
     torch.manual_seed(seed)
